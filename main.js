@@ -1,22 +1,21 @@
-const code = "A->B:N\n*A";
-// const code = "A->B:E\nB->C:F";
-// const code = "A->B:E\nB->C:F\n*A";
-// const code = "A->B:E\n*B\nC->D:F";
+const code = "A->B:N \n *A";
+// const code = "A->B:E \n B->C:F";
+// const code = "A->B:E \n B->C:F\n*A";
+// const code = "A->B:E \n *B\nC->D:F";
 
-const syntacticallyInvalidCode = "A-B";
+const syntacticallyInvalidCode = "A|B";
 const logicallyInvalidCode = "A->B:N\n*X";
 
 try {
-  parse(tokenize(code));
-  // parse(tokenize(syntacticallyInvalidCode));
-  //   parse(tokenize(logicallyInvalidCode));
+  //   parse(tokenize(code));
+  parse(tokenize(syntacticallyInvalidCode));
+  // parse(tokenize(logicallyInvalidCode));
 } catch (error) {
   console.log("");
   console.log("!!!!!ERROR OCCURED!!!!");
   console.log("");
   console.error(error);
 }
-// parse(tokenize(logicallyInvalidCode));
 
 // input: the whole code in our language to be read as a string
 // output: a list of tokens
