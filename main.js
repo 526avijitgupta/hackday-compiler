@@ -7,8 +7,8 @@ const syntacticallyInvalidCode = "A|B";
 const logicallyInvalidCode = "A->B:N\n*X";
 
 try {
-  //   parse(tokenize(code));
-  parse(tokenize(syntacticallyInvalidCode));
+  parse(tokenize(code));
+  //   parse(tokenize(syntacticallyInvalidCode));
   // parse(tokenize(logicallyInvalidCode));
 } catch (error) {
   console.log("");
