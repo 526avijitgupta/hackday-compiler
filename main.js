@@ -18,15 +18,15 @@ function tokenize(code) {
   //   console.log(lines);
   let tokens = [];
 
-  lines.forEach(line => {
+  lines.forEach(readLine => {
+    let line = readLine.trim();
     console.log(line);
     let isEdge = false; // it's a node till we encounter ":"
     let lineCurr = 0;
     let char = line[lineCurr];
+
     while (lineCurr < line.length) {
-      //   console.log(char, lineCurr);
       if (validTokens.STRING.test(char)) {
-        // console.log("got string ", char);
         let str = "";
         while (validTokens.STRING.test(char)) {
           str += char;
@@ -34,7 +34,6 @@ function tokenize(code) {
           if (lineCurr === line.length) break;
           char = line[lineCurr];
         }
-        // console.log("pushing string token ", str);
 
         tokens.push({
           type: isEdge ? "edge" : "node", // either node or edge
@@ -82,8 +81,7 @@ function tokenize(code) {
         continue;
       }
 
-      //   lineCurr += 1;
-      //   char = line[lineCurr];
+      // throw error
     }
   });
 
