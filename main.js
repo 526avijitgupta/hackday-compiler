@@ -1,7 +1,22 @@
 const code = "A->B:N\n*A";
 // const code = "A->B:E\nB->C:F";
 // const code = "A->B:E\nB->C:F\n*A";
-parser(tokenize(code));
+// const code = "A->B:E\n*B\nC->D:F";
+
+const syntacticallyInvalidCode = "A-B";
+const logicallyInvalidCode = "A->B:N\n*X";
+
+try {
+  parse(tokenize(code));
+  // parse(tokenize(syntacticallyInvalidCode));
+  //   parse(tokenize(logicallyInvalidCode));
+} catch (error) {
+  console.log("");
+  console.log("!!!!!ERROR OCCURED!!!!");
+  console.log("");
+  console.error(error);
+}
+// parse(tokenize(logicallyInvalidCode));
 
 // input: the whole code in our language to be read as a string
 // output: a list of tokens
@@ -15,10 +30,12 @@ function tokenize(code) {
   };
 
   const lines = code.split("\n");
-  //   console.log(lines);
   let tokens = [];
 
-  lines.forEach(readLine => {
+  console.log("====INPUT CODE====");
+  console.log("");
+  lines.forEach((readLine, index) => {
+    const linum = index + 1;
     let line = readLine.trim();
     console.log(line);
     let isEdge = false; // it's a node till we encounter ":"
@@ -54,7 +71,13 @@ function tokenize(code) {
           char = line[lineCurr];
           continue;
         } else {
+          const errorMessage = !char
+            ? `Unexpected end of line ${linum} : ${line}`
+            : `Unexpected token ${
+                line[lineCurr - 1]
+              }${char} at line ${linum} : ${line}`;
           // throw error, invalid syntax
+          throw new SyntaxError(errorMessage);
         }
       }
 
@@ -81,20 +104,22 @@ function tokenize(code) {
         continue;
       }
 
-      // throw error
+      throw new SyntaxError(
+        `Unexpected token: ${char} at line ${linum}: ${line}`
+      );
     }
   });
 
-  console.log("");
-  console.log("");
-  console.log("Tokenizer");
-  console.log(tokens);
+  //   console.log("");
+  //   console.log("");
+  //   console.log("Tokenizer");
+  //   console.log(tokens);
   return tokens;
 }
 
 // input: the list of tokens
 // output: an AST
-function parser(tokens) {
+function parse(tokens) {
   const operations = {
     arrow: "createEdge",
     destroy: "destroy",
@@ -155,6 +180,13 @@ function parser(tokens) {
         }
       } else {
         // throw error
+        let errorMessage;
+        if (!validateNodesAroundArrow(i, tokens)) {
+          errorMessage = `Invalid or no node specified to create edge`;
+        } else if (!validateLabelAfterArrow(i, tokens)) {
+          errorMessage = `Invalid or no label specified`;
+        }
+        throw new Error(errorMessage);
       }
       lastRoot = node;
     }
@@ -163,7 +195,7 @@ function parser(tokens) {
       let node = newNode(operations.destroy);
       ast.push(node);
       // validate that the asterisk is followed by a valid node
-      if (i + 1 < tokens.length && tokens[i + 1].type === "node") {
+      if (validateNodeToDestroy(i, tokens)) {
         // traverse the ast and ensure that it contains a node with this value
         const filteredNodes = filterNodesFromAst(
           ast,
@@ -175,14 +207,22 @@ function parser(tokens) {
           node.next = lastRoot.id;
         } else {
           // throw error
+          throw new Error(
+            `Can't destroy node ${tokens[i + 1].value} before creation`
+          );
         }
       } else {
         // throw error
+        throw new Error(`Invalid usage of *`);
       }
       lastRoot = node;
     }
   }
   lastRoot.root = true;
+
+  function validateNodeToDestroy(i, tokens) {
+    return i + 1 < tokens.length && tokens[i + 1].type === "node";
+  }
 
   function newNode(type) {
     return {
@@ -227,8 +267,8 @@ function parser(tokens) {
   }
 
   console.log("");
+  console.log("====AST CREATED====");
   console.log("");
-  console.log("Parser");
   console.log(ast);
 }
 
