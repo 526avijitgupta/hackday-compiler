@@ -1,9 +1,10 @@
-// const code = "A->B:E\nB->C:F";
 const code = "A->B:N\n*A";
+// const code = "A->B:E\nB->C:F";
+// const code = "A->B:E\nB->C:F\n*A";
 parser(tokenize(code));
 
 // input: the whole code in our language to be read as a string
-// output: an list of tokens
+// output: a list of tokens
 function tokenize(code) {
   const validTokens = {
     COLON: ":",
@@ -84,28 +85,13 @@ function tokenize(code) {
       //   lineCurr += 1;
       //   char = line[lineCurr];
     }
-    // console.log(tokens);
   });
-  //   console.log(tokens);
 
   console.log("");
   console.log("");
   console.log("Tokenizer");
   console.log(tokens);
   return tokens;
-}
-
-function newNode(type) {
-  return {
-    id: Math.random()
-      .toString(36)
-      .substring(7),
-    type: type,
-    value: null,
-    left: "",
-    right: "",
-    dependsOn: ""
-  };
 }
 
 // input: the list of tokens
@@ -118,8 +104,6 @@ function parser(tokens) {
   };
   let ast = [];
   let lastRoot;
-
-  // { left, right, type, value }
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
@@ -168,9 +152,8 @@ function parser(tokens) {
 
         node.value = tokens[i + 3].value;
 
-        // attach dependsOn
         if (lastRoot) {
-          lastRoot.dependsOn = node.id;
+          node.next = lastRoot.id;
         }
       } else {
         // throw error
@@ -189,10 +172,9 @@ function parser(tokens) {
           operations.node,
           tokens[i + 1].value
         );
-        // console.log(filteredNodes, ast, tokens[i + 1].value);
         if (filteredNodes.length === 1) {
           node.left = filteredNodes[0].id;
-          lastRoot.dependsOn = node.id;
+          node.next = lastRoot.id;
         } else {
           // throw error
         }
@@ -201,6 +183,20 @@ function parser(tokens) {
       }
       lastRoot = node;
     }
+  }
+  lastRoot.root = true;
+
+  function newNode(type) {
+    return {
+      id: Math.random()
+        .toString(36)
+        .substring(7),
+      type: type,
+      value: null,
+      left: "",
+      right: "",
+      next: ""
+    };
   }
 
   function validateNodesAroundArrow(i, tokens) {
