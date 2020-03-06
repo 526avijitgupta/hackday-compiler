@@ -117,12 +117,12 @@ function parser(tokens) {
     node: "createNode"
   };
   let ast = [];
+  let lastRoot;
 
   // { left, right, type, value }
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
-    let lastRoot;
     // arrow: create Edge operation
     // asterisk: destroy operation
     // look for the first create edge
@@ -138,7 +138,11 @@ function parser(tokens) {
         validateNodesAroundArrow(i, tokens) &&
         validateLabelAfterArrow(i, tokens)
       ) {
-        let filteredNodes = filterNodesFromAst("node", tokens[i - 1].value);
+        let filteredNodes = filterNodesFromAst(
+          ast,
+          operations.node,
+          tokens[i - 1].value
+        );
         if (filteredNodes.length === 1) {
           node.left = filteredNodes[0].id;
         } else {
@@ -148,7 +152,11 @@ function parser(tokens) {
           node.left = left.id;
         }
 
-        filteredNodes = filterNodesFromAst("node", tokens[i + 1].value);
+        filteredNodes = filterNodesFromAst(
+          ast,
+          operations.node,
+          tokens[i + 1].value
+        );
         if (filteredNodes.length === 1) {
           node.right = filteredNodes[0].id;
         } else {
@@ -176,7 +184,12 @@ function parser(tokens) {
       // validate that the asterisk is followed by a valid node
       if (i + 1 < tokens.length && tokens[i + 1].type === "node") {
         // traverse the ast and ensure that it contains a node with this value
-        const filteredNodes = filterNodesFromAst("node", tokens[i + 1].value);
+        const filteredNodes = filterNodesFromAst(
+          ast,
+          operations.node,
+          tokens[i + 1].value
+        );
+        // console.log(filteredNodes, ast, tokens[i + 1].value);
         if (filteredNodes.length === 1) {
           node.left = filteredNodes[0].id;
           lastRoot.dependsOn = node.id;
@@ -207,9 +220,15 @@ function parser(tokens) {
     );
   }
 
-  function filterNodesFromAst(type, value) {
-    return ast.filter(node => {
-      node.type === type && node.value === value;
+  function filterNodesFromAst(ast, type, value) {
+    // console.log("");
+    // console.log(type);
+    // console.log(value);
+    // ast.forEach(astNode => {
+    //   console.log(astNode);
+    // });
+    return ast.filter(astNode => {
+      return astNode.type === type && astNode.value === value;
     });
   }
 
